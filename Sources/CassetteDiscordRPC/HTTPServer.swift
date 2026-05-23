@@ -35,12 +35,9 @@ actor HTTPServer {
             return
         }
 
-        let params = NWParameters.tcp
-        params.requiredLocalEndpoint = NWEndpoint.hostPort(host: .ipv4(.loopback), port: nwPort)
-
         let newListener: NWListener
         do {
-            newListener = try NWListener(using: params)
+            newListener = try NWListener(using: .tcp, on: nwPort)
         } catch {
             logger.error("Failed to create HTTP listener: \(error.localizedDescription, privacy: .public)")
             return
@@ -54,9 +51,17 @@ actor HTTPServer {
             }
         }
 
+        let capturedPort = port
         newListener.stateUpdateHandler = { state in
-            if case .failed(let error) = state {
+            switch state {
+            case .ready:
+                logger.info("HTTP server listening on port \(capturedPort, privacy: .public)")
+            case .failed(let error):
                 logger.error("HTTP server failed: \(error.localizedDescription, privacy: .public)")
+            case .waiting(let error):
+                logger.warning("HTTP server waiting: \(error.localizedDescription, privacy: .public)")
+            default:
+                break
             }
         }
 
