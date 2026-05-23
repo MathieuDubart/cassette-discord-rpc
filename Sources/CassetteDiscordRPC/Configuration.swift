@@ -8,6 +8,17 @@ private let logger = Logger(
 
 struct Configuration: Decodable, Sendable {
     let clientId: String
+    let port: UInt16
+
+    private enum CodingKeys: String, CodingKey {
+        case clientId, port
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        clientId = try container.decode(String.self, forKey: .clientId)
+        port = try container.decodeIfPresent(UInt16.self, forKey: .port) ?? 47832
+    }
 }
 
 enum ConfigurationError: Error {
