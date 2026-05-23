@@ -54,8 +54,8 @@ struct Activity: Encodable {
         let timestamps = Args.ActivityPayload.Timestamps(start: Int(info.startedAt))
         let buttons = [Args.ActivityPayload.Button(label: "Get Cassette", url: "https://getcassette.app")]
         let payload = Args.ActivityPayload(
-            name: info.title,
-            details: "\(info.artist) - \(info.album)",
+            name: "\(info.title) - \(info.artist)",
+            details: "\(info.album)",
             state: "sur Cassette",
             assets: assets,
             timestamps: timestamps,

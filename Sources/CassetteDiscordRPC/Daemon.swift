@@ -23,11 +23,14 @@ actor Daemon {
     func run() async {
         logger.info("Daemon starting")
 
-        await ipcClient.connect()
-        logger.info("Connected to Discord IPC")
-
+        // Start HTTP server immediately
         let events = await server.start()
-        logger.info("HTTP server listening on localhost:\(self.config.port, privacy: .public)")
+        logger.info("HTTP server started on localhost:\(self.config.port, privacy: .public)")
+
+        // Connect to Discord IPC in background (retries independently)
+        Task {
+            await ipcClient.connect()
+        }
 
         for await event in events {
             switch event {
