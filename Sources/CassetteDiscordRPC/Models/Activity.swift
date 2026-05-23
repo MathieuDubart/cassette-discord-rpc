@@ -56,7 +56,7 @@ struct Activity: Encodable {
         let payload = Args.ActivityPayload(
             name: "\(info.title) - \(info.artist)",
             details: "\(info.album)",
-            state: "sur Cassette",
+            state: "on Cassette",
             assets: assets,
             timestamps: timestamps,
             buttons: buttons,
