@@ -26,10 +26,17 @@ struct Activity: Encodable {
                 let start: Int
             }
 
+            struct Button: Encodable {
+                let label: String
+                let url: String
+            }
+
+            let name: String
             let details: String
             let state: String
             let assets: Assets
             let timestamps: Timestamps
+            let buttons: [Button]
         }
 
         let pid: Int
@@ -43,15 +50,18 @@ struct Activity: Encodable {
         let assets = Args.ActivityPayload.Assets(
             large_image: coverArtURL,
             large_text: info.album,
-            small_image: "https://raw.githubusercontent.com/MathieuDubart/cassette-discord-rpc/main/Assets/cassette-icon.png",
+            small_image: "cassette-icon",
             small_text: "Cassette"
         )
         let timestamps = Args.ActivityPayload.Timestamps(start: Int(info.startedAt))
+        let buttons = [Args.ActivityPayload.Button(label: "Get Cassette", url: "https://getcassette.app")]
         let payload = Args.ActivityPayload(
-            details: "\(info.title) - \(info.artist)",
-            state: "Sur Cassette",
+            name: info.title,
+            details: "\(info.artist) - \(info.album)",
+            state: "sur Cassette",
             assets: assets,
-            timestamps: timestamps
+            timestamps: timestamps,
+            buttons: buttons
         )
         let args = Args(
             pid: Int(ProcessInfo.processInfo.processIdentifier),
