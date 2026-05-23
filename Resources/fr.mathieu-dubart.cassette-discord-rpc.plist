@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>fr.mathieu-dubart.cassette-discord-rpc</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/cassette-discord-rpc</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/cassette-discord-rpc.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/cassette-discord-rpc.err</string>
+</dict>
+</plist>
