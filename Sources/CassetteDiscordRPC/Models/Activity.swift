@@ -37,6 +37,7 @@ struct Activity: Encodable {
             let assets: Assets
             let timestamps: Timestamps
             let buttons: [Button]
+            let type: Int
         }
 
         let pid: Int
@@ -61,7 +62,8 @@ struct Activity: Encodable {
             state: "sur Cassette",
             assets: assets,
             timestamps: timestamps,
-            buttons: buttons
+            buttons: buttons,
+            type: 2
         )
         let args = Args(
             pid: Int(ProcessInfo.processInfo.processIdentifier),
