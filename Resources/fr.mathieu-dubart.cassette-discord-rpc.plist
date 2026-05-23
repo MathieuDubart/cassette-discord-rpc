@@ -6,7 +6,7 @@
     <string>fr.mathieu-dubart.cassette-discord-rpc</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/cassette-discord-rpc</string>
+        <string>/usr/local/bin/CassetteDiscordRPC</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
