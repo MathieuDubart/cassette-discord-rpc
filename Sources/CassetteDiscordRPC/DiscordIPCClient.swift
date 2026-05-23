@@ -96,21 +96,27 @@ actor DiscordIPCClient {
     }
 
     private func tryConnect() -> NWConnection? {
-        for i in 0...9 {
-            let path = "/tmp/discord-ipc-\(i)"
-            guard FileManager.default.fileExists(atPath: path) else { continue }
+        let tmpdir = ProcessInfo.processInfo.environment["TMPDIR"] ?? FileManager.default.temporaryDirectory.path
+        let candidates = [tmpdir, "/tmp"]
 
-            let endpoint = NWEndpoint.unix(path: path)
-            let conn = NWConnection(to: endpoint, using: .tcp)
-            logger.info("Attempting Discord IPC connection on socket \(i, privacy: .public)")
-            return conn
+        for i in 0...9 {
+            for dir in candidates {
+                let path = "\(dir)/discord-ipc-\(i)"
+                guard FileManager.default.fileExists(atPath: path) else { continue }
+
+                let endpoint = NWEndpoint.unix(path: path)
+                let conn = NWConnection(to: endpoint, using: .tcp)
+                logger.info("Attempting Discord IPC connection on socket \(i, privacy: .public)")
+                return conn
+            }
         }
-        logger.warning("No Discord IPC socket found in /tmp/discord-ipc-0..9")
+        logger.warning("No Discord IPC socket found in \(tmpdir, privacy: .public)/discord-ipc-0..9 or /tmp/discord-ipc-0..9")
         return nil
     }
 
     private func performHandshake(on connection: NWConnection) async {
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            nonisolated(unsafe) var resumed = false
             connection.stateUpdateHandler = { [weak self] state in
                 guard let self else { return }
                 switch state {
@@ -118,17 +124,23 @@ actor DiscordIPCClient {
                     Task {
                         await self.sendHandshake(on: connection)
                         await self.setIsConnected(true)
+                        guard !resumed else { return }
+                        resumed = true
                         continuation.resume()
                     }
                 case .failed(let error):
                     logger.error("Discord IPC connection failed: \(error.localizedDescription, privacy: .public)")
                     Task {
                         await self.setIsConnected(false)
+                        guard !resumed else { return }
+                        resumed = true
                         continuation.resume()
                     }
                 case .cancelled:
                     Task {
                         await self.setIsConnected(false)
+                        guard !resumed else { return }
+                        resumed = true
                         continuation.resume()
                     }
                 default:
