@@ -11,13 +11,13 @@ actor Daemon {
     private let config: Configuration
     private let ipcClient: DiscordIPCClient
     private let musicBrainz: MusicBrainzClient
-    private let observer: NowPlayingObserver
+    private let server: HTTPServer
 
     init(config: Configuration) {
         self.config = config
         self.ipcClient = DiscordIPCClient(clientId: config.clientId)
         self.musicBrainz = MusicBrainzClient()
-        self.observer = NowPlayingObserver()
+        self.server = HTTPServer(port: config.port)
     }
 
     func run() async {
@@ -26,7 +26,10 @@ actor Daemon {
         await ipcClient.connect()
         logger.info("Connected to Discord IPC")
 
-        for await event in observer.events() {
+        let events = await server.start()
+        logger.info("HTTP server listening on localhost:\(self.config.port, privacy: .public)")
+
+        for await event in events {
             switch event {
             case .trackChanged(let info):
                 await handleTrackChanged(info)

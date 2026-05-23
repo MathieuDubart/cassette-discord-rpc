@@ -1,4 +1,4 @@
-struct NowPlayingInfo: Sendable {
+struct NowPlayingInfo: Sendable, Decodable {
     let title: String
     let artist: String
     let album: String
