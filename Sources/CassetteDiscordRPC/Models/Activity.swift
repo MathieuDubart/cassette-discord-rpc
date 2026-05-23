@@ -4,10 +4,22 @@ struct Activity: Encodable {
     struct Args: Encodable {
         struct ActivityPayload: Encodable {
             struct Assets: Encodable {
-                var large_image: String?
-                var large_text: String?
+                let large_image: String?
+                let large_text: String
                 let small_image: String
                 let small_text: String
+
+                private enum CodingKeys: String, CodingKey {
+                    case large_image, large_text, small_image, small_text
+                }
+
+                func encode(to encoder: Encoder) throws {
+                    var container = encoder.container(keyedBy: CodingKeys.self)
+                    try container.encodeIfPresent(large_image, forKey: .large_image)
+                    try container.encode(large_text, forKey: .large_text)
+                    try container.encode(small_image, forKey: .small_image)
+                    try container.encode(small_text, forKey: .small_text)
+                }
             }
 
             struct Timestamps: Encodable {
@@ -36,8 +48,8 @@ struct Activity: Encodable {
         )
         let timestamps = Args.ActivityPayload.Timestamps(start: Int(info.startedAt))
         let payload = Args.ActivityPayload(
-            details: info.title,
-            state: "\(info.artist) — \(info.album)",
+            details: "\(info.title) - \(info.artist)",
+            state: "Sur Cassette",
             assets: assets,
             timestamps: timestamps
         )
