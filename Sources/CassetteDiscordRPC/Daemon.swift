@@ -12,6 +12,7 @@ actor Daemon {
     private let ipcClient: DiscordIPCClient
     private let musicBrainz: MusicBrainzClient
     private let server: HTTPServer
+    private var inactivityTask: Task<Void, Never>?
 
     init(config: Configuration) {
         self.config = config
@@ -44,6 +45,7 @@ actor Daemon {
 
     private func handleTrackChanged(_ info: NowPlayingInfo) async {
         logger.info("Handling track change")
+        resetInactivityTimer()
         let coverArtURL = await musicBrainz.coverArtURL(artist: info.artist, album: info.album)
         let activity = Activity.make(from: info, coverArtURL: coverArtURL)
         await ipcClient.setActivity(activity)
@@ -51,6 +53,20 @@ actor Daemon {
 
     private func handlePlaybackStopped() async {
         logger.info("Handling playback stop, clearing Discord activity")
+        resetInactivityTimer()
         await ipcClient.clearActivity()
+    }
+
+    private func resetInactivityTimer() {
+        inactivityTask?.cancel()
+        inactivityTask = Task {
+            do {
+                try await Task.sleep(for: .seconds(5 * 60))
+                logger.info("No activity for 5 minutes, clearing Discord presence")
+                await ipcClient.clearActivity()
+            } catch {
+                // Cancelled — a new event arrived before the timeout
+            }
+        }
     }
 }
